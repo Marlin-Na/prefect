@@ -6,7 +6,6 @@ from time import sleep
 
 from google.cloud.exceptions import NotFound
 
-from prefect import context
 from prefect.client import Secret
 from prefect.core import Task
 from prefect.utilities.gcp import get_storage_client
@@ -66,7 +65,7 @@ class GCSBaseTask(Task):
     ):
         "Retrieves blob based on user settings."
         if blob is None:
-            blob = "prefect-" + context.get("task_run_id", "no-id-" + str(uuid.uuid4()))
+            blob = "prefect-" + prefect.context.get("task_run_id", "no-id-" + str(uuid.uuid4()))
 
         if chunk_size is None:
             chunk_size = self.chunk_size

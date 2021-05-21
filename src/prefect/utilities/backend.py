@@ -23,7 +23,5 @@ def save_backend(backend: str) -> None:
 
 
 def backend_path() -> Path:
-    from prefect import context
-
-    path = "{home}/".format(home=context.config.home_dir)
+    path = "{home}/".format(home=prefect.context.config.home_dir)
     return Path(os.path.expanduser(path)) / "backend.toml"

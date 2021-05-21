@@ -20,7 +20,6 @@ from typing import Any, List, Optional
 import pendulum
 
 import prefect
-from prefect.utilities.context import context
 
 _original_log_record_factory = logging.getLogRecordFactory()
 
@@ -51,7 +50,8 @@ class LogManager:
         """Ensure the log manager is started"""
         if self.thread is None:
             self.client = prefect.Client()
-            self.logging_period = context.config.cloud.logging_heartbeat
+
+            self.logging_period = prefect.utilities.context.config.cloud.logging_heartbeat
             self.thread = threading.Thread(
                 target=self._write_logs_loop,
                 name="prefect-log-manager",
@@ -139,11 +139,11 @@ class CloudHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:  # type: ignore
         """Emit a new log"""
         # if we shouldn't log to cloud, don't emit
-        if not context.config.logging.log_to_cloud:
+        if not prefect.utilities.context.config.logging.log_to_cloud:
             return
 
         # ensures emitted logs respect configured logging level
-        config_level = getattr(logging, context.config.logging.level, logging.INFO)
+        config_level = getattr(logging, prefect.utilities.context.config.logging.level, logging.INFO)
 
         if record.levelno < config_level:
             return
@@ -159,8 +159,8 @@ class CloudHandler(logging.Handler):
             msg = msg[:MAX_LOG_LENGTH]
 
         log = {
-            "flow_run_id": context.get("flow_run_id"),
-            "task_run_id": context.get("task_run_id"),
+            "flow_run_id": prefect.utilities.context.get("flow_run_id"),
+            "task_run_id": prefect.utilities.context.get("task_run_id"),
             "timestamp": pendulum.from_timestamp(
                 getattr(record, "created", None) or time.time()
             ).isoformat(),
@@ -185,10 +185,10 @@ def _log_record_context_injector(*args: Any, **kwargs: Any) -> logging.LogRecord
     """
     record = _original_log_record_factory(*args, **kwargs)
 
-    additional_attrs = context.config.logging.get("log_attributes", [])
+    additional_attrs = prefect.utilities.context.config.logging.get("log_attributes", [])
 
     for attr in PREFECT_LOG_RECORD_ATTRIBUTES + tuple(additional_attrs):
-        value = context.get(attr, None)
+        value = prefect.utilities.context.get(attr, None)
         if value or attr in additional_attrs:
             setattr(record, attr, value)
 
@@ -211,11 +211,11 @@ def _create_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
     handler = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter(
-        context.config.logging.format, context.config.logging.datefmt
+        prefect.utilities.context.config.logging.format, prefect.utilities.context.config.logging.datefmt
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    logger.setLevel(context.config.logging.level)
+    logger.setLevel(prefect.utilities.context.config.logging.level)
     logger.addHandler(CloudHandler())
     return logger
 
@@ -237,7 +237,7 @@ def configure_logging(testing: bool = False) -> logging.Logger:
     return _create_logger(name)
 
 
-context.logger = prefect_logger = configure_logging()
+prefect.utilities.context.logger = prefect_logger = configure_logging()
 
 
 def configure_extra_loggers() -> None:
@@ -245,7 +245,7 @@ def configure_extra_loggers() -> None:
     Creates a "Prefect" configured logger for all strings in extra_loggers config list.
     The logging.extra_loggers config defaults to an empty list.
     """
-    loggers = context.config.logging.get("extra_loggers", [])
+    loggers = prefect.utilities.context.config.logging.get("extra_loggers", [])
     for l in loggers:
         _create_logger(l)
 

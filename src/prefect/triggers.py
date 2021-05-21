@@ -97,7 +97,7 @@ def manual_only(upstream_states: Dict["core.Edge", "state.State"]) -> bool:
     Args:
         - upstream_states (dict[Edge, State]): the set of all upstream states
     """
-    if context.get("resume"):
+    if prefect.context.get("resume"):
         return True
 
     raise signals.PAUSE('Trigger function is "manual_only"')

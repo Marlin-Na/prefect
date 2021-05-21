@@ -8,7 +8,7 @@ from slugify import slugify
 from sys import platform
 from typing import TYPE_CHECKING, Dict, Iterable, List, Tuple
 
-from prefect import config, context
+from prefect import config
 from prefect.agent import Agent
 from prefect.run_configs import DockerRun
 from prefect.utilities.agent import get_flow_image, get_flow_run_command
@@ -122,11 +122,11 @@ class DockerAgent(Agent):
         )
 
         # Determine Daemon URL
-        self.base_url = base_url or context.get("base_url", default_url)
+        self.base_url = base_url or prefect.context.get("base_url", default_url)
         self.logger.debug("Base docker daemon url {}".format(self.base_url))
 
         # Determine pull specification
-        self.no_pull = no_pull or context.get("no_pull", False)
+        self.no_pull = no_pull or prefect.context.get("no_pull", False)
         self.logger.debug("no_pull set to {}".format(self.no_pull))
 
         # Resolve volumes from specs

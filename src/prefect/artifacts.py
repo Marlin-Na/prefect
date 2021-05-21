@@ -1,7 +1,7 @@
 import time
 from typing import Optional
 
-from prefect import context, Client
+from prefect import Client
 from prefect.utilities.exceptions import ClientError
 
 
@@ -13,12 +13,12 @@ def _running_with_backend() -> bool:
     Returns:
         - bool: if `_running_with_backend` is set in context
     """
-    return bool(context.get("running_with_backend"))
+    return bool(prefect.context.get("running_with_backend"))
 
 
 def _create_task_run_artifact(kind: str, data: dict) -> str:
     client = Client()
-    task_run_id = context.get("task_run_id")
+    task_run_id = prefect.context.get("task_run_id")
     # XXX: there's a race condition in the cloud backend for mapped tasks where
     # the task run lookup might fail temporarily. This should last a few
     # seconds max, for now we retry a few times.

@@ -22,7 +22,6 @@ from prefect.engine.state import Failed, Submitted
 from prefect.run_configs import RunConfig, UniversalRun
 from prefect.serialization import state
 from prefect.serialization.run_config import RunConfigSchema
-from prefect.utilities.context import context
 from prefect.utilities.exceptions import AuthorizationError
 from prefect.utilities.graphql import GraphQLResult, with_args, EnumValue
 
@@ -919,7 +918,7 @@ class Agent:
             isinstance(handler, logging.StreamHandler) for handler in logger.handlers
         ):
             ch = logging.StreamHandler(sys.stdout)
-            formatter = logging.Formatter(context.config.logging.format)
+            formatter = logging.Formatter(prefect.utilities.context.context.config.logging.format)
             formatter.converter = time.gmtime  # type: ignore
             ch.setFormatter(formatter)
             logger.addHandler(ch)

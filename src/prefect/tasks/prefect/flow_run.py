@@ -4,7 +4,7 @@ import warnings
 from typing import Any
 from urllib.parse import urlparse
 
-from prefect import context, Task
+from prefect import Task
 from prefect.artifacts import create_link
 from prefect.client import Client
 from prefect.engine.signals import signal_from_state
@@ -170,7 +170,7 @@ class StartFlowRun(Task):
         flow_id = flow[0].id
 
         if idempotency_key is None:
-            idempotency_key = context.get("task_run_id", None)
+            idempotency_key = prefect.context.get("task_run_id", None)
 
         # providing an idempotency key ensures that retries for this task
         # will not create additional flow runs

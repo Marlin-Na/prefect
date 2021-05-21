@@ -6,7 +6,6 @@ import weakref
 from contextlib import contextmanager
 from typing import Any, Callable, Iterator, TYPE_CHECKING, Union, Optional
 
-from prefect import context
 from prefect.executors.base import Executor
 from prefect.utilities.importtools import import_object
 
@@ -136,7 +135,7 @@ class DaskExecutor(Executor):
         debug: bool = None,
     ):
         if address is None:
-            address = context.config.engine.executor.dask.address or None
+            address = prefect.context.config.engine.executor.dask.address or None
 
         if address is not None:
             if cluster_class is not None or cluster_kwargs is not None:
@@ -145,7 +144,7 @@ class DaskExecutor(Executor):
                 )
         else:
             if cluster_class is None:
-                cluster_class = context.config.engine.executor.dask.cluster_class
+                cluster_class = prefect.context.config.engine.executor.dask.cluster_class
             if isinstance(cluster_class, str):
                 cluster_class = import_object(cluster_class)
             if cluster_kwargs is None:
@@ -157,7 +156,7 @@ class DaskExecutor(Executor):
 
             if cluster_class == LocalCluster:
                 if debug is None:
-                    debug = context.config.debug
+                    debug = prefect.context.config.debug
                 cluster_kwargs.setdefault(
                     "silence_logs", logging.CRITICAL if not debug else logging.WARNING
                 )

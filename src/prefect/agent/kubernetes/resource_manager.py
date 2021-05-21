@@ -8,7 +8,6 @@ import pendulum
 
 from prefect import Client
 from prefect import config as prefect_config
-from prefect.utilities.context import context
 
 if TYPE_CHECKING:
     import kubernetes
@@ -35,7 +34,7 @@ class ResourceManager:
         logger.setLevel(logging.DEBUG)
         ch = logging.StreamHandler(sys.stdout)
         ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(context.config.logging.format)
+        formatter = logging.Formatter(prefect.utilities.context.context.config.logging.format)
         formatter.converter = time.gmtime  # type: ignore
         ch.setFormatter(formatter)
         logger.addHandler(ch)
